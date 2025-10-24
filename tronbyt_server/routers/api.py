@@ -235,7 +235,7 @@ def handle_patch_device_app(
     db_conn: sqlite3.Connection = Depends(get_db),
     auth: tuple[User | None, Device | None] = Depends(get_user_and_device_from_api_key),
 ) -> Response:
-    _, device = auth
+    user, device = auth
     if not device or device.id != device_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
@@ -268,14 +268,16 @@ def handle_patch_device_app(
         if data.set_pinned:
             # Pin the app
             device.pinned_app = installation_id
-            db.save_app(db_conn, device_id, app)
-            return Response("App pinned.", status_code=status.HTTP_200_OK)
+            user.devices[device_id] = device
+            if db.save_user(db_conn, user):
+                return Response("App pinned.", status_code=status.HTTP_200_OK)
         else:
             # Unpin the app (only if it's currently pinned)
             if device.pinned_app == installation_id:
                 device.pinned_app = None
-                db.save_app(db_conn, device_id, app)
-                return Response("App unpinned.", status_code=status.HTTP_200_OK)
+                user.devices[device_id] = device
+                if db.save_user(db_conn, user):
+                    return Response("App unpinned.", status_code=status.HTTP_200_OK)
             else:
                 return Response("App is not pinned.", status_code=status.HTTP_200_OK)
 
