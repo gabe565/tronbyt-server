@@ -1,6 +1,7 @@
 services:
   web:
     image: ghcr.io/tronbyt/server:1 # latest v1.x.x release tag
+    pull_policy: daily
     restart: unless-stopped
     ports:
       - "${SERVER_PORT:-8000}:8000" # Map server port on the host to port 8000 in the container
@@ -30,6 +31,7 @@ services:
       - redis
   redis:
     image: redis:8-alpine
+    pull_policy: weekly
     restart: unless-stopped
     volumes:
       - redis:/data
