@@ -24,7 +24,7 @@ services:
       timeout: 10s
       retries: 3
   proxy:
-    image: caddy:latest
+    image: caddy:2-alpine
     pull_policy: weekly
     restart: unless-stopped
     ports:
